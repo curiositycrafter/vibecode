@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Human Preloader - Page 2</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #canvas {
+            background: #87ceeb;
+        }
+        #content {
+            display: none;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #content h1 {
+            font-size: 3em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <canvas id="canvas" width="800" height="400"></canvas>
+    </div>
+    <div id="content">
+        <h1>Welcome to Page 2!</h1>
+        <p>Click the button to go back to the first page.</p>
+        <button onclick="window.location.href='index.html'">Go to Page 1</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loader = document.getElementById('loader');
+        const content = document.getElementById('content');
+
+        // Character properties
+        let x = 50;
+        let y = canvas.height - 100;
+        let speed = 5;
+        let isRunningInPlace = true;
+        let isTransitioning = false;
+        let frame = 0;
+        let frameCount = 4;
+        let spriteWidth = 40;
+        let spriteHeight = 60;
+        let tiredTime = 5000;
+        let startTime = Date.now();
+
+        // Background properties
+        let groundOffset = 0;
+        let cloud1X = 100;
+        let cloud2X = 400;
+        let cloudSpeed = 1;
+
+        // Draw dynamic background
+        function drawBackground() {
+            ctx.fillStyle = '#87ceeb';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (isRunningInPlace && !isTransitioning) {
+                // Scrolling ground
+                ctx.fillStyle = '#228b22';
+                ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+                ctx.fillStyle = '#1a6b1a';
+                for (let i = -groundOffset % 50; i < canvas.width; i += 50) {
+                    ctx.fillRect(i, canvas.height - 50, 25, 10);
+                }
+                groundOffset += speed / 2;
+                if (groundOffset > 50) groundOffset = 0;
+
+                // Moving clouds
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(cloud1X, 50, 20, 0, Math.PI * 2);
+                ctx.arc(cloud1X + 30, 50, 25, 0, Math.PI * 2);
+                ctx.arc(cloud1X + 60, 50, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cloud2X, 80, 20, 0, Math.PI * 2);
+                ctx.arc(cloud2X + 30, 80, 25, 0, Math.PI * 2);
+                ctx.arc(cloud2X + 60, 80, 20, 0, Math.PI * 2);
+                ctx.fill();
+                cloud1X -= cloudSpeed;
+                cloud2X -= cloudSpeed;
+                if (cloud1X < -60) cloud1X = canvas.width + 60;
+                if (cloud2X < -60) cloud2X = canvas.width + 60;
+            } else {
+                // Static ground when tired or transitioning
+                ctx.fillStyle = '#228b22';
+                ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(cloud1X, 50, 20, 0, Math.PI * 2);
+                ctx.arc(cloud1X + 30, 50, 25, 0, Math.PI * 2);
+                ctx.arc(cloud1X + 60, 50, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cloud2X, 80, 20, 0, Math.PI * 2);
+                ctx.arc(cloud2X + 30, 80, 25, 0, Math.PI * 2);
+                ctx.arc(cloud2X + 60, 80, 20, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Draw human-like character
+        function drawCharacter() {
+            ctx.save();
+            ctx.translate(x, y);
+            if (isRunningInPlace && !isTransitioning) {
+                // Running in place
+                ctx.fillStyle = '#f5deb3';
+                ctx.beginPath();
+                ctx.arc(20, 0, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff4500';
+                ctx.fillRect(15, 10, 10, 20);
+                ctx.fillStyle = '#000';
+                let legOffset = frame % 2 === 0 ? -5 : 5;
+                ctx.fillRect(15, 30, 5, 15 + legOffset);
+                ctx.fillRect(20, 30, 5, 15 - legOffset);
+                ctx.fillRect(10, 10, 5, 15 - legOffset);
+                ctx.fillRect(25, 10, 5, 15 + legOffset);
+            } else if (!isRunningInPlace && !isTransitioning) {
+                // Tired state
+                ctx.fillStyle = '#f5deb3';
+                ctx.beginPath();
+                ctx.arc(20, 10, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff4500';
+                ctx.fillRect(15, 20, 10, 15);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(15, 35, 10, 5);
+                ctx.fillRect(10,
